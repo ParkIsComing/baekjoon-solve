@@ -41,45 +41,61 @@ public class Main {
     
     // 2. 공기청정기 작동 (위쪽 바람 : 동북서남)
     public static void operateUp() {
-        for (int x = top - 1; x > 0; x--) {
-            map[x][0] = map[x - 1][0];
+        int x = top;
+        int y = 0;
+        int preValue = 0;
+        
+        while (true) {
+            if (x == top && y != C-1) { // 동쪽으로 이동
+                y++;    
+            } else if (0 < x && x <= top && y == C-1) { // 북쪽으로 이동
+                x--;
+            } else if (x == 0 && y!=0) { // 서쪽
+                y--;
+            } else if (0 <= x && x < top && y == 0){ // 남쪽
+                x++;
+            
+            }
+            int tmp = map[x][y];
+            map[x][y] = preValue;
+            preValue = tmp;
+            
+            // 원점
+            if (x == top && y == 0) {
+                map[x][y] = -1;
+                break;
+            }
         }
- 
-        for (int y = 0; y < C - 1; y++) {
-            map[0][y] = map[0][y + 1];
-        }
- 
-        for (int x = 0; x < top; x++) {
-            map[x][C - 1] = map[x + 1][C - 1];
-        }
- 
-        for (int y = C - 1; y > 1; y--) {
-            map[top][y] = map[top][y - 1];
-        }
- 
-        map[top][1] = 0;
         
     }
     
     // 3. 공기청정기 작동 (아래쪽 바람 : 동남서북)
     public static void operateDown() {
-        for (int x = bottom + 1; x < R - 1; x++) {
-            map[x][0] = map[x + 1][0];
+        int x = bottom;
+        int y = 0;
+        int preValue = 0;
+        
+        while (true) {
+            if (x == bottom && y != C-1) { // 동쪽으로 이동
+                y++;    
+            } else if (bottom <= x && x < R-1 && y == C-1) { // 남쪽으로 이동
+                x++;
+            } else if (x == R-1 && y!=0) { // 서쪽
+                y--;
+            } else if (bottom < x && x <= R-1 && y == 0){ // 북쪽
+                x--;
+            
+            }
+            int tmp = map[x][y];
+            map[x][y] = preValue;
+            preValue = tmp;
+            
+            // 원점
+            if (x == bottom && y == 0) {
+                map[x][y] = -1;
+                break;
+            }
         }
- 
-        for (int y = 0; y < C - 1; y++) {
-            map[R - 1][y] = map[R - 1][y + 1];
-        }
- 
-        for (int x = R - 1; x > bottom; x--) {
-            map[x][C - 1] = map[x - 1][C - 1];
-        }
- 
-        for (int y = C - 1; y > 1; y--) {
-            map[bottom][y] = map[bottom][y - 1];
-        }
- 
-        map[bottom][1] = 0;
     }
     
     public static void main(String args[]) throws IOException {
@@ -96,15 +112,15 @@ public class Main {
               map[i][j] = Integer.parseInt(st.nextToken());
           }
       }
-      
+        
       for (int i=0; i<R; i++) {// 공기청정기 위치 업데이트
           if (map[i][0] == -1) {
               top = i;
               bottom = i+1;
               break;
           }
-      }
-      
+      }      
+        
       for (int i=0; i<T; i++) {
           diffuse();
           operateUp();
@@ -119,6 +135,7 @@ public class Main {
               }
           }
       }
+        
       System.out.println(sum);
 
     }
