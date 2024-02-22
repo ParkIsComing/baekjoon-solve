@@ -4,50 +4,36 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.awt.*;
 
-class Plan {
-    int length;
-    int price;
-    
-    Plan (int length, int price) {
-        this.length = length;
-        this.price = price;
-    }
-}
-
 public class Main {
     static int n;
-    static ArrayList<Plan>[] list;
-    static int maxSum = 0;
+    static int[] length;
+    static int[] price;
     
     public static int dp() {
         int[] d = new int[n+1];
         
-        for (int i=1; i<=n; i++) {
-            for (Plan n : list[i]){ // 없는 경우?
-                for (int j=0; j<i-n.length+1; j++) {
-                    d[i] = Math.max(d[i], d[j] + n.price);
-                }
+        for (int i=0; i<n; i++) {
+            if (i + length[i] <= n) { // 채택 가능한 경우
+                d[i + length[i]] = Math.max(d[i + length[i]], d[i] + price[i]);
             }
+            d[i+1] = Math.max(d[i+1], d[i]); 
         }
         
-        return Arrays.stream(d).max().getAsInt();
-        
+        return d[n];
     }
     public static void main(String args[]) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         n = Integer.parseInt(br.readLine());
-        list = new ArrayList[1015];
-        
-        for (int i=0; i<list.length; i++) {
-            list[i] = new ArrayList<>();
-        }
+        length = new int[n];
+        price = new int[n];
         
         StringTokenizer st;
-        for (int i=1; i<=n; i++) {
+        for (int i=0; i<n; i++) {
             st = new StringTokenizer(br.readLine());
             int T = Integer.parseInt(st.nextToken());
             int P = Integer.parseInt(st.nextToken());
-            list[i+T-1].add(new Plan(T, P)); // (기간, 금액)
+            length[i] = T;
+            price[i] = P;
         }
         
         System.out.println(dp());
