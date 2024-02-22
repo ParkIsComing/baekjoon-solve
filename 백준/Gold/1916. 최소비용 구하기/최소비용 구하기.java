@@ -46,7 +46,6 @@ public class Main {
     }
     
     public static int dijkstra() {
-        boolean[] visited = new boolean[n+1];
         int[] dist = new int[n+1];
         int INF = Integer.MAX_VALUE;
         Arrays.fill(dist, INF);
@@ -58,11 +57,9 @@ public class Main {
         while(!q.isEmpty()) {
             Node cur = q.poll();
             
-            // 우선순위큐이니까 여기서 방문처리
-            if (visited[cur.idx]) {
+            if (dist[cur.idx]  < cur.cost) {
                 continue;
             }
-            visited[cur.idx] = true;
             
             for (Node next : graph[cur.idx]) {
                 if (dist[next.idx] > dist[cur.idx] + next.cost) {
