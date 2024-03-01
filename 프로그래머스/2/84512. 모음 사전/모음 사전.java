@@ -2,23 +2,18 @@ import java.util.*;
 
 class Solution {
     static char[] characters = {'A','E','I','O','U'};
-    static List<String> list = new ArrayList<>();
+    static HashMap<String, Integer> map = new HashMap<>();
+    static int index = 0;
     
     public int solution(String word) {
-        int answer = 0;
-        makeWord(0, "");
+        makeWord(0, ""); // ""은 0번째로 들어가서 무관
         
-        for (int i=0; i<list.size(); i++) {
-            if (list.get(i).equals(word)) {
-                answer = i;
-                break;
-            }
-        }
+        int answer = map.get(word);
         return answer;
     }
     
     public void makeWord(int count, String num) {
-        list.add(num);
+        map.put(num, index++); // 위치 주의 (꼭 아래 if문 위에 와야됨 다 저장하니까)
         if (count == 5) { // 다섯 글자 다 사용
             return;
         }
