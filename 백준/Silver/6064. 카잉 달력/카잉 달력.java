@@ -27,7 +27,7 @@ public class Main {
           st = new StringTokenizer(br.readLine());
           M = Integer.parseInt(st.nextToken());
           N = Integer.parseInt(st.nextToken());
-          x = Integer.parseInt(st.nextToken()) -1;
+          x = Integer.parseInt(st.nextToken()) -1; // 나머지가 0이 되는 것을 막기 위해
           y = Integer.parseInt(st.nextToken()) -1;
           
           sb.append(findLastYear());
