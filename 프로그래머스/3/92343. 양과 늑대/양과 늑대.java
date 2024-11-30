@@ -5,23 +5,9 @@ class Solution {
     Set<List<Integer>> stateCache = new HashSet<>();
     static final int SHEEP = 0;
     static final int WOLF = 1;
-    
-    class State {
-        int node;
-        int sheepCount;
-        int wolfCount;
-        List<Integer> candidates = new ArrayList<>();
-        
-        public State(int node, int sheepCount, int wolfCount, List<Integer> candidates) {
-            this.node = node;
-            this.sheepCount = sheepCount;
-            this.wolfCount = wolfCount;
-            this.candidates = candidates;
-        }
-    }
+    int maxCount = 0;
     
     public int solution(int[] info, int[][] edges) {
-        int maxCount = 0;
         
         // 그래프 초기화
         for (int i=0; i<info.length; i++) {
@@ -32,48 +18,46 @@ class Solution {
             graph.get(e[0]).add(e[1]);
         }
         
+        List<Integer> initialCandidates = new ArrayList<>(graph.get(0));
+        stateCache.add(initialCandidates);
+        dfs(0,0,0, initialCandidates, info);
         
-        Stack<State> states = new Stack<>();
-        State start = new State(0,0,0, new ArrayList<>(graph.get(0))); // 시작은 0
-        states.push(start);
-        stateCache.add(start.candidates);
+        return maxCount;
+    }
+    
+    private void dfs(int node, int sheepCount, int wolfCount, List<Integer> candidates, int[] info) {
+        // 동물 수 업데이트
+        if (info[node] == SHEEP) {
+            sheepCount++;
+        } else {
+            wolfCount++;
+        }
         
-        while (!states.isEmpty()) {
-            State cur = states.pop();
-            
-            // 동물 수 업데이트
-            if (info[cur.node] == SHEEP) {
-                cur.sheepCount++;
-            } else {
-                cur.wolfCount++;
+        // 양의 수가 늑대 수보다 작아지면 탐색 중단
+        if (wolfCount >= sheepCount) {
+            return;
+        }
+        
+         // 최대 양 수 업데이트
+        maxCount = Math.max(maxCount, sheepCount);
+        
+        for (int next: candidates) {
+            List<Integer> addedCandidates = graph.get(next);
+            List<Integer> newCandidates = new ArrayList<>(candidates);
+            newCandidates.remove(Integer.valueOf(next));
+            for (int c : addedCandidates) {
+                newCandidates.add(c);
             }
-            
-            // 더이상 이동 불가한 경우 (양 수 < 늑대 수 || 이동 가능한 노드 없음)
-            if (cur.sheepCount <= cur.wolfCount || cur.candidates.size() == 0) {
-                maxCount = Math.max(maxCount, cur.sheepCount);
+
+            //  현재 위치가 달라도 다음 갈 수 있는 노드 목록이 같으면 같은 상태
+            if (stateCache.contains(newCandidates)) {
                 continue;
             }
-            
-            // 다음 노드로 이동
-            for (int next: cur.candidates) {
-                List<Integer> addedCandidates = graph.get(next);
-                List<Integer> newCandidates = new ArrayList<>(cur.candidates);
-                newCandidates.remove(Integer.valueOf(next));
-                for (int node : addedCandidates) {
-                    newCandidates.add(node);
-                }
-                State nextState = new State(next, cur.sheepCount, cur.wolfCount, newCandidates);
-                
-                //  현재 위치가 달라도 다음 갈 수 있는 노드 목록이 같으면 같은 상태
-                if (stateCache.contains(nextState.candidates)) {
-                    continue;
-                }
-                
-                states.push(nextState);
-                stateCache.add(nextState.candidates);
-                
-            }   
-        }
-        return maxCount;
+
+            stateCache.add(newCandidates);
+            dfs(next, sheepCount, wolfCount, newCandidates, info);
+
+        }   
+
     }
 }
