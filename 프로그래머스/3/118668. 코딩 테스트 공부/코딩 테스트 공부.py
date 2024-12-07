@@ -1,12 +1,13 @@
 # DP
 
 def solution(alp, cop, problems):
-    max_alp, max_cop = 0,0 # 목표값을 초과하면 안 되기 때문에 사용
+    max_alp, max_cop = 0,0
     
     for problem in problems:
         max_alp = max(max_alp, problem[0])
         max_cop = max(max_cop, problem[1])
     
+    # 초기에 조건 만족
     alp = min(max_alp, alp)
     cop = min(max_cop, cop)
     
