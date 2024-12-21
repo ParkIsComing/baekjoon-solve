@@ -15,7 +15,8 @@ class Solution {
             for (int[] col : row)
                 Arrays.fill(col, INF); 
 
-        Queue<int[]> queue = new LinkedList<>();// [x, y, 이전방향, 현재 비용]
+        // Queue<int[]> queue = new LinkedList<>();// [x, y, 이전방향, 현재 비용]
+        PriorityQueue<int[]> queue = new PriorityQueue<>(Comparator.comparingInt(a -> a[3])); 
         
         // 시작점 갱신
         for (int i = 0; i < 4; i++) {
