@@ -1,4 +1,5 @@
 import java.util.*;
+// 출발지에서 산봉우리까지의 최소 intensity 값을 구하기 -> 동일한 경로를 따라 출발지로 돌아오면 됨
 
 class Solution {
     public int[] solution(int n, int[][] paths, int[] gates, int[] summits) {
@@ -33,6 +34,7 @@ class Solution {
             int d = current[0];
             int now = current[1];
 
+            // 산봉우리 or 더 큰 intensity -> 더 이상 이동 x
             if (intensity[now] < d || summitSet.contains(now)) {
                 continue;
             }
@@ -48,6 +50,7 @@ class Solution {
             }
         }
 
+        // 구한 intensity 중 가장 작은 값 리턴
         int[] result = {0, Integer.MAX_VALUE};
         for (int summit : summits) {
             if (intensity[summit] < result[1]) {
