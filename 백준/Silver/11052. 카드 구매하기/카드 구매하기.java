@@ -14,6 +14,7 @@ public class Main {
         for (int i=1; i<=n; i++) {
             card[i] = Integer.parseInt(st.nextToken());
         }
+        
         int[] dp = new int[n+1];
         dp[0] = 0;
         dp[1] = 1;
