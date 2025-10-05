@@ -20,7 +20,7 @@ class Node implements Comparable<Node>{
 public class Main {
 	public static int N,D;
 	public static ArrayList<Node>[] shortcuts = new ArrayList[10001]; // 시작점, 도착점, 길이
-	public static int[] dist = new int[10001];
+	public static int[] dp = new int[10001];
 
 	public static void input() throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -51,35 +51,20 @@ public class Main {
 	}
 
 	public static int solve() {
-		Arrays.fill(dist, Integer.MAX_VALUE);
-
-		PriorityQueue<Node> pq = new PriorityQueue<>();
-		pq.offer(new Node(0, 0));
-		dist[0] = 0;
-
-		while (!pq.isEmpty()) {
-			Node cur = pq.poll();
-			if (cur.cost > dist[cur.idx]) { //현재 큐에서 꺼낸 거리 vs. 지금 알고 있는 그 노드의 가장 짧은 거리
-				continue;
+		Arrays.fill(dp, Integer.MAX_VALUE);
+		dp[0] = 0;
+		for (int i=0; i<=D; i++) {
+			if (i >= 1) {
+				dp[i] = Math.min(dp[i-1] + 1, dp[i]); // 정상적인 경로
 			}
 
-			// 지름길 업데이트
-			for (Node next: shortcuts[cur.idx]) {
-				if (dist[next.idx] > dist[cur.idx] + next.cost) {
-					dist[next.idx] = dist[cur.idx] + next.cost;
-					pq.offer(new Node(next.idx, dist[next.idx]));
-				}
-			}
-
-			// 지름길 vs. 그냥 이동
-			if (cur.idx+1 <= D && dist[cur.idx + 1] > cur.cost + 1) {
-				dist[cur.idx + 1] = cur.cost + 1;
-				pq.offer(new Node(cur.idx + 1, dist[cur.idx + 1]));
+			for (Node next: shortcuts[i]) {
+				dp[next.idx] = Math.min(dp[i] + next.cost, dp[next.idx]);
 			}
 
 		}
 
-		return dist[D];
+		return dp[D];
 	}
 
 	public static void main(String[] args) throws Exception {
