@@ -1,67 +1,90 @@
+import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
-class Node {
-	int idx;
-	int cost;
+class Node implements Comparable<Node>{
+	int idx; // 현재 노드
+	int cost; // 시작점에서 현재 노드까지의 거리
 
-	Node (int idx, int cost) {
+	public Node(int idx, int cost) {
 		this.idx = idx;
 		this.cost = cost;
+	}
+
+	@Override
+	public int compareTo(Node o) {
+		return Integer.compare(this.cost, o.cost);
 	}
 }
 
 public class Main {
-    static int n, d;
-	static ArrayList<Node>[] graph;
-	static int[] dist;
+	public static int N,D;
+	public static ArrayList<Node>[] shortcuts = new ArrayList[10001]; // 시작점, 도착점, 길이
+	public static int[] dist = new int[10001];
 
-	public static void dijkstra(int x) { // 하나씩 움직이면서 지름길 있으면 갱신
-		if (x > d) {
-		    return;
-		}
-		
-		if (dist[x+1] > dist[x] + 1) { // x에서 x+1하나 움직이는게 더 작으면 업데이트
-		    dist[x+1] = dist[x] + 1;
-		}
-
-		for (Node next : graph[x]) { // 지름길 있으면 업데이트
-		    if (dist[next.idx] > dist[x] + next.cost ) {
-		        dist[next.idx] = dist[x] + next.cost;
-		    }
-		}
-		
-		dijkstra(x+1);
-
-	}
-	public static void main(String args[]) throws IOException {
+	public static void input() throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st = new StringTokenizer(br.readLine());
-		n = Integer.parseInt(st.nextToken()); // 지름길 개수
-		d = Integer.parseInt(st.nextToken()); // 고속도로 길이
 
-		graph = new ArrayList[10001];
+		N = Integer.parseInt(st.nextToken());
+		D = Integer.parseInt(st.nextToken());
 
-		for (int i=0; i < 10001; i++) {
-			graph[i] = new ArrayList<>();
+		for (int i=0; i<=D; i++) {
+			shortcuts[i] = new ArrayList<>();
 		}
 
-		for (int i=0; i<n; i++) {
-		    st = new StringTokenizer(br.readLine());
-			int a = Integer.parseInt(st.nextToken());
-			int b = Integer.parseInt(st.nextToken());
-			int shortcut =  Integer.parseInt(st.nextToken());
-			graph[a].add(new Node(b, shortcut)); // 유향 그래프
+		for (int i=0; i<N; i++) {
+			st = new StringTokenizer(br.readLine());
+			int start = Integer.parseInt(st.nextToken());
+			int end = Integer.parseInt(st.nextToken());
+			int cost = Integer.parseInt(st.nextToken());
+
+			if (end > D) { // 지름길이 도착점이 D보다 크면 불필요(역주행은 불가능)
+				continue;
+			}
+			if (cost >= end-start) { // 이득이 없는 지름길은 무시
+				continue;
+			}
+
+			shortcuts[start].add(new Node(end, cost));
 		}
-		
-		dist = new int[10001];
-		for (int i=0; i< dist.length; i++) {
-		    dist[i] = i;
+	}
+
+	public static int solve() {
+		Arrays.fill(dist, Integer.MAX_VALUE);
+
+		PriorityQueue<Node> pq = new PriorityQueue<>();
+		pq.offer(new Node(0, 0));
+		dist[0] = 0;
+
+		while (!pq.isEmpty()) {
+			Node cur = pq.poll();
+			if (cur.cost > dist[cur.idx]) { //현재 큐에서 꺼낸 거리 vs. 지금 알고 있는 그 노드의 가장 짧은 거리
+				continue;
+			}
+
+			// 지름길 업데이트
+			for (Node next: shortcuts[cur.idx]) {
+				if (dist[next.idx] > dist[cur.idx] + next.cost) {
+					dist[next.idx] = dist[cur.idx] + next.cost;
+					pq.offer(new Node(next.idx, dist[next.idx]));
+				}
+			}
+
+			// 지름길 vs. 그냥 이동
+			if (cur.idx+1 <= D && dist[cur.idx + 1] > cur.cost + 1) {
+				dist[cur.idx + 1] = cur.cost + 1;
+				pq.offer(new Node(cur.idx + 1, dist[cur.idx + 1]));
+			}
+
 		}
 
-        dijkstra(0);
-        System.out.println(dist[d]);
+		return dist[D];
+	}
+
+	public static void main(String[] args) throws Exception {
+		input();
+		int answer = solve();
+		System.out.println(answer);
 	}
 }
