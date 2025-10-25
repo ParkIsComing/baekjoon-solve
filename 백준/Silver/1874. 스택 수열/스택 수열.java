@@ -2,7 +2,6 @@ import java.util.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.awt.*;
 
 public class Main {
 
@@ -13,37 +12,30 @@ public class Main {
         for (int i=1; i<n+1; i++) {
             arr[i] = Integer.parseInt(br.readLine());
         }
-        
-        Stack<Integer> s = new Stack<>();
+
+        Deque<Integer> stack = new ArrayDeque<>();
         int count = 0; // 어디까지 넣었는지 나타냄
         StringBuilder sb = new StringBuilder();
-        
+
         for (int i=1; i<=n; i++) {
-            if (s.search(arr[i]) == -1) {// 스택에서 꺼내야하는 수가 없으면
-                if (count < arr[i]) { // 더 넣으면 되는 경우
-                    for (int j=count+1; j<= arr[i]; j++) {
-                        s.push(j);
-                        sb.append('+').append('\n');
-                        count++;
-                    }
-                    s.pop();
-                    sb.append('-').append('\n');
-                } else { // 더 넣을 수 없는 경우
-                    System.out.println("NO");
-                    return;
-                }
-            } else {
-                while (s.pop() != arr[i]) {
-                    sb.append('-').append('\n');
-                }
-                sb.append('-').append('\n');
+            int target = arr[i];
+
+            while (count < target) {
+                stack.push(++count);
+                sb.append("+\n");
             }
-              
+
+            // 뽑을게 없으면
+            if (stack.isEmpty() || !stack.peek().equals(target)) {
+                System.out.println("NO");
+                return;
+            }
+
+            stack.pop();
+            sb.append("-\n");;
         }
-        
+
         System.out.println(sb);
     }
-    
-   
-    
+
 }
