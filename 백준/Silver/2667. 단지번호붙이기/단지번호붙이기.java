@@ -1,61 +1,79 @@
-import java.util.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.awt.*;
+import java.io.*;
+import java.util.*;
 
 public class Main {
-    static int[][] graph;
-    static int n, count = 0;
-    static ArrayList<Integer> answer = new ArrayList<Integer>();
-    static int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+	static final int[][] DIR = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}};
+	static int n;
+	static int[][] map;
+	static boolean[][] visited;
+	static ArrayList<Integer> cntPerComplex;
 
-    public static void dfs(int x, int y) {
-        if (x < 0 || x >= n || y < 0 || y>= n) {
-            return;
-        }
-        
-        if (graph[x][y] == 1) {
-            count++;
-            graph[x][y] = -1; // 방문한 곳은 -1
-            dfs(x-1, y);
-            dfs(x, y-1);
-            dfs(x+1, y);
-            dfs(x, y+1);
-        }
 
-    } 
-    
-    public static void main(String args[]) throws IOException {
-      BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-      n = Integer.parseInt(br.readLine()); // 한 변의 길이 (2^k)
-      graph = new int[n][n];
-      
-      StringTokenizer st;
-      // 종이 정보 입력 받기
-      for (int i=0; i<n; i++) {
-          String input = br.readLine();
-          for (int j=0; j<n; j++) {
-              graph[i][j] = (int)(input.charAt(j) - '0');
-          }
-      }
-      
-      for (int i=0; i<n; i++) {
-          for (int j=0; j<n; j++) {
-              dfs(i,j);
-              if (count != 0) {
-                  answer.add(count);
-                  count = 0;
-              }
-          }
-      }
-      
-      System.out.println(answer.size());
-      
-      Collections.sort(answer);
-      for (int i: answer) {
-          System.out.println(i);
-      }
-      
-    }
+	public static void main(String[] args) throws IOException {
+		input();
+		System.out.println(findHomes());
+		Collections.sort(cntPerComplex);
+		cntPerComplex.stream().forEach(System.out::println);
+	}
+
+	private static void input() throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st = new StringTokenizer(br.readLine());
+		n = Integer.parseInt(st.nextToken());
+		map = new int[n][n];
+		visited = new boolean[n][n];
+		cntPerComplex = new ArrayList<>();
+
+		for (int i=0; i<n; i++) {
+			String s = br.readLine();
+			for (int j=0; j<n; j++) {
+				map[i][j] = s.charAt(j) - '0';
+			}
+		}
+	}
+
+	private static int findHomes() {
+		int complexCnt = 0;
+		for (int i=0; i<n; i++) {
+			for (int j=0; j<n; j++) {
+				if (!visited[i][j] && map[i][j] == 1) {
+					cntPerComplex.add(bfs(i,j));
+					complexCnt++;
+				}
+			}
+		}
+
+		return complexCnt;
+	}
+
+	private static int bfs(int x, int y) {
+		Deque<Point> q = new ArrayDeque<>();
+		q.offer(new Point(x, y));
+		visited[x][y] = true;
+		int homeCnt = 1;
+
+		while (!q.isEmpty()) {
+			Point p = q.poll();
+
+			for (int[] dir : DIR) {
+				int nx = p.x + dir[0];
+				int ny = p.y + dir[1];
+
+				if (inRange(nx, ny) &&  map[nx][ny] == 1 && !visited[nx][ny]) {
+					visited[nx][ny] = true;
+					homeCnt++;
+					q.offer(new Point(nx, ny));
+				}
+			}
+		}
+
+		return homeCnt;
+	}
+
+	private static boolean inRange(int x, int y) {
+		return x >= 0 && x < n && y >= 0 && y < n;
+	}
+
+
 }
