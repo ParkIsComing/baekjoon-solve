@@ -1,76 +1,79 @@
-import java.util.Arrays;
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
+
+class Node {
+    int next;
+    int cost;
+
+    public Node(int next, int cost) {
+        this.next = next;
+        this.cost = cost;
+    }
+}
 
 public class Main {
+    static int v,e;
+    static int[][] graph;
     static int[] parent;
 
-    public static int find(int x) {
+    public static void main(String[] args) throws IOException{
+        input();
+        solution();
+    }
+
+    static void input() throws IOException{
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        v = Integer.parseInt(st.nextToken());
+        e = Integer.parseInt(st.nextToken());
+        graph = new int[e][3]; // start, end, cost
+
+        for (int i=0; i<e; i++) {
+            st = new StringTokenizer(br.readLine());
+            int a = Integer.parseInt(st.nextToken());
+            int b = Integer.parseInt(st.nextToken());
+            int cost = Integer.parseInt(st.nextToken());
+            graph[i][0] = a;
+            graph[i][1] = b;
+            graph[i][2] = cost;
+        }
+
+        parent = new int[v+1];
+        for (int i=0; i<=v; i++) {
+            parent[i] = i;
+        }
+        // 유지비 오름차순 정렬
+        Arrays.sort(graph, (o1, o2) -> Integer.compare(o1[2], o2[2]));
+    }
+
+    static void solution() {
+        int cost = 0;
+        int maxCost = 0;
+        for (int[] node : graph) {
+            if (find(node[0]) == find(node[1])) continue;
+            cost += node[2];
+            union(node[0], node[1]);
+            maxCost = node[2];
+        }
+
+        System.out.println(cost-maxCost);
+    }
+
+    static void union(int x, int y) {
+        x = find(x);
+        y = find(y);
+        if (x != y) {
+            parent[y] = x;
+        }
+    }
+
+    static int find(int x) {
         if (parent[x] == x) {
             return x;
         }
-        return parent[x] = find(parent[x]);
+        return parent[x] = find(parent[x]); // 경로 압축
     }
 
-    public static void union(int a, int b) {
-        int rootA = find(a);
-        int rootB = find(b);
-        if (rootA != rootB) {
-            parent[rootB] = rootA;
-        }
-    }
-
-    public static class Edge implements Comparable<Edge> {
-        int from;
-        int to;
-        int cost;
-
-        public Edge(int from, int to, int cost) {
-            this.from = from;
-            this.to = to;
-            this.cost = cost;
-        }
-
-        @Override
-        public int compareTo(Edge other) {
-            return this.cost - other.cost;
-        }
-    }
-
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        int N = scanner.nextInt();
-        int M = scanner.nextInt();
-
-        Edge[] edges = new Edge[M];
-        parent = new int[N + 1];
-
-        for (int i = 1; i <= N; i++) {
-            parent[i] = i;
-        }
-
-        for (int i = 0; i < M; i++) {
-            int A = scanner.nextInt();
-            int B = scanner.nextInt();
-            int C = scanner.nextInt();
-            edges[i] = new Edge(A, B, C);
-        }
-
-        Arrays.sort(edges);
-
-        int mstCost = 0;
-        int maxEdgeCost = 0;
-
-        for (Edge edge : edges) {
-            if (find(edge.from) != find(edge.to)) {
-                union(edge.from, edge.to);
-                mstCost += edge.cost;
-                maxEdgeCost = edge.cost; 
-            }
-        }
-
-        int result = mstCost - maxEdgeCost;
-        System.out.println(result);
-
-        scanner.close();
-    }
 }
