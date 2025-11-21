@@ -1,74 +1,104 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 
+class Node {
+	int idx;
+	int cost;
+
+	public Node(int idx, int cost) {
+		this.idx = idx;
+		this.cost = cost;
+	}
+}
+
 public class Main {
-    private void solution() throws Exception {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int n = Integer.parseInt(br.readLine());
-        int m = Integer.parseInt(br.readLine());
+	static final int INF = 1_000_000_000; // m * max cost
+	static int M, N, start, end;
+	static int[] dist;
+	static int[] prev;
+	static ArrayList<Node>[] graph;
 
-        List<int[]>[] edges = new ArrayList[n + 1];
-        for (int i = 1; i <= n; i++) {
-            edges[i] = new ArrayList<>();
-        }
+	public static void main(String[] args) throws IOException {
+		input();
+		dijkstra();
+	}
 
-        for (int i = 0; i < m; i++) {
-            StringTokenizer st = new StringTokenizer(br.readLine());
-            int a = Integer.parseInt(st.nextToken());
-            int b = Integer.parseInt(st.nextToken());
-            int c = Integer.parseInt(st.nextToken());
-            edges[a].add(new int[]{b, c});
-        }
+	static void input() throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		N = Integer.parseInt(br.readLine());
+		M = Integer.parseInt(br.readLine());
 
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        int start = Integer.parseInt(st.nextToken());
-        int end = Integer.parseInt(st.nextToken());
+		graph = new ArrayList[N+1];
+		for (int i = 0; i <= N; i++) {
+			graph[i] = new ArrayList<>();
+		}
 
-        int[] dist = new int[n + 1];
-        int[] parents = new int[n + 1];
-        Arrays.fill(dist, Integer.MAX_VALUE);
-        dist[start] = 0;
+		StringTokenizer st;
+		for (int i=0; i<M; i++) {
+			st = new StringTokenizer(br.readLine());
+			int start = Integer.parseInt(st.nextToken());
+			int end = Integer.parseInt(st.nextToken());
+			int cost = Integer.parseInt(st.nextToken());
 
-        PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparingInt(o -> o[1]));
-        pq.add(new int[]{start, 0});
+			graph[start].add(new Node(end, cost));
+		}
 
-        while (!pq.isEmpty()) {
-            int[] current = pq.poll();
-            int curNode = current[0];
-            int curDist = current[1];
+		st = new StringTokenizer(br.readLine());
+		start = Integer.parseInt(st.nextToken());
+		end = Integer.parseInt(st.nextToken());
+	}
 
-            if (curDist > dist[curNode]) continue;
+	static void dijkstra () {
+		dist = new int[N + 1];
+		prev = new int[N + 1];
+		Arrays.fill(dist, INF);
+		dist[start] = 0;
+		prev[start] = -1;
 
-            for (int[] edge : edges[curNode]) {
-                int nextNode = edge[0];
-                int nextDist = curDist + edge[1];
+		PriorityQueue<Node> q = new PriorityQueue<>((o1,o2) -> Integer.compare(o1.cost, o2.cost));
+		q.offer(new Node(start, 0));
 
-                if (nextDist < dist[nextNode]) {
-                    dist[nextNode] = nextDist;
-                    parents[nextNode] = curNode;
-                    pq.add(new int[]{nextNode, nextDist});
-                }
-            }
-        }
+		while(!q.isEmpty()) {
+			Node cur = q.poll();
 
-        List<Integer> path = new ArrayList<>();
-        for (int node = end; node != 0; node = parents[node]) {
-            path.add(node);
-        }
-        Collections.reverse(path);
+			if (dist[cur.idx] < cur.cost) { // 이미 우선순위큐로 업데이트 된 경우
+				continue;
+			}
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(dist[end]).append('\n');
-        sb.append(path.size()).append('\n');
-        for (int node : path) {
-            sb.append(node).append(' ');
-        }
+			for (Node next : graph[cur.idx]) {
+				if (dist[next.idx] > dist[cur.idx] + next.cost) {
+					dist[next.idx] = dist[cur.idx] + next.cost;
+					prev[next.idx] = cur.idx;
+					q.offer(new Node(next.idx, dist[next.idx]));
+				}
+			}
+		}
 
-        System.out.println(sb);
-    }
+		printAnswer();
 
-    public static void main(String[] args) throws Exception {
-        new Main().solution();
-    }
+	}
+
+	static void printAnswer() {
+		int minCost = dist[end];
+		int cityCount = 0;
+		int cur = end;
+		List<Integer> cities = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		while (cur != -1) {
+			cityCount++;
+			cities.add(cur);
+			cur = prev[cur];
+		}
+
+		Collections.reverse(cities);
+
+		System.out.println(minCost);
+		System.out.println(cityCount);
+		for (int i : cities) {
+			sb.append(i).append(" ");
+		}
+		System.out.println(sb);
+
+	}
+
 }
