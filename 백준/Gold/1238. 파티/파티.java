@@ -17,6 +17,7 @@ public class Main {
 	static final int INF = Integer.MAX_VALUE;
 	static int N,M,X; // N개 노드, M개 간선, 시작점 X
 	static ArrayList<Node>[] graph;
+	static ArrayList<Node>[] reversedGraph;
 
 	public static void main(String[] args) throws IOException {
 		input();
@@ -31,8 +32,10 @@ public class Main {
 		X = Integer.parseInt(st.nextToken()); // 파티를 여는 마을
 
 		graph = new ArrayList[1001];
+		reversedGraph = new ArrayList[1001];
 		for (int i=1; i<=N; i++) {
 			graph[i] = new ArrayList<>();
+			reversedGraph[i] = new ArrayList<>();
 		}
 
 		for (int i=0; i<M; i++) {
@@ -41,6 +44,7 @@ public class Main {
 			int b = Integer.parseInt(st.nextToken());
 			int time = Integer.parseInt(st.nextToken());
 			graph[a].add(new Node(b, time)); // 단방향 가중치 그래프
+			reversedGraph[b].add(new Node(a, time));// 뒤집힌 단방향 그래프
 		}
 
 
@@ -48,16 +52,17 @@ public class Main {
 
 	static void solution() {
 		int maxTime = Integer.MIN_VALUE;
-		for (int i=1; i<=N; i++) {
-			int timeToX = dijkstra(i, X);
-			int timeToHome = dijkstra(X, i);
-			maxTime = Math.max(maxTime, timeToX+timeToHome);
+		int[] distAlltoX = dijkstra(X, reversedGraph);
+		int[] distXtoAll = dijkstra(X, graph);
+
+		for (int i=1; i<=N; i++ ) {
+			maxTime = Math.max(maxTime, distAlltoX[i] + distXtoAll[i]);
 		}
 
 		System.out.println(maxTime);
 	}
 
-	static int dijkstra (int start, int dest) {
+	static int[] dijkstra (int start, ArrayList<Node>[] map) {
 		int[] dist = new int[N+1];
 		Arrays.fill(dist, INF);
 		dist[start] = 0;
@@ -72,7 +77,7 @@ public class Main {
 				continue;
 			}
 
-			for (Node next: graph[cur.idx]) {
+			for (Node next: map[cur.idx]) {
 				if (dist[next.idx] > dist[cur.idx] + next.cost) {
 					dist[next.idx] = dist[cur.idx] + next.cost;
 					q.offer(new Node(next.idx, dist[next.idx]));
@@ -80,7 +85,7 @@ public class Main {
 			}
 		}
 
-		return dist[dest];
+		return dist;
 	}
 
 
