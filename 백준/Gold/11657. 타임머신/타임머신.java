@@ -1,81 +1,79 @@
+import java.io.*;
 import java.util.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
-class Edge {
-    int start;
-    int end;
-    int cost;
-    
-    Edge (int start, int end, int cost) {
-        this.start = start;
-        this.end = end;
-        this.cost = cost;
-    }
+//오는 길 != 가는 길일수 있음
+
+class Node {
+	int idx;
+	int cost;
+
+	Node (int idx, int cost) {
+		this.idx = idx;
+		this.cost = cost;
+	}
 }
-// 단방향 가중치그래프
-// 음의 간선 ㅇ
 
 public class Main {
-    static int N, M;
-    static ArrayList<Edge> graph = new ArrayList<>();
-    static long[] dist = new long[501];
-    static final int INF = 60000000;
-    
-    
-    static String findShortestTime(int base) {
-        Arrays.fill(dist, INF);
-        dist[base] = 0;
-        
-        for (int i=0; i<N-1; i++) {
-            for (int j=0; j<M; j++) {
-                Edge e = graph.get(j);
-                if (dist[e.start] != INF && dist[e.start] + e.cost < dist[e.end]) {
-                    dist[e.end] = dist[e.start] + e.cost;                                                                            
-                }
-            }
-        }
-        
-        StringBuilder sb = new StringBuilder();
-        // 음의 사이클 있으면 -1 출력
-        for (int i=0; i<M; i++) {
-            Edge e = graph.get(i);
-            if (dist[e.start] != INF && dist[e.start] + e.cost < dist[e.end]) {
-                sb.append(-1);
-                return sb.toString();
-            }
-        }
-        
-        
-        for (int i=2; i<=N; i++) {
-            if (dist[i] == INF) {
-                sb.append(-1);
-            } else {
-                sb.append(dist[i]);
-            }
-            sb.append("\n");
-        }
-        
-        return sb.toString();
-    }
-  
-    public static void main(String args[]) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        
-        N = Integer.parseInt(st.nextToken()); // 노드
-        M = Integer.parseInt(st.nextToken()); // 간선
-        
-        for (int i=0; i<M; i++) {
-            st = new StringTokenizer(br.readLine());
-            int a = Integer.parseInt(st.nextToken());
-            int b = Integer.parseInt(st.nextToken());
-            int cost = Integer.parseInt(st.nextToken());
-            
-            graph.add(new Edge(a, b, cost));
-        }
-        
-        System.out.println(findShortestTime(1));
-    }
+	static final int INF = 500 * 10_000;
+	static int N,M; // N개 노드, M개 간선
+	static int[][] data;
+
+	public static void main(String[] args) throws IOException {
+		input();
+		solution();
+	}
+
+	static void input() throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st = new StringTokenizer(br.readLine());
+		N = Integer.parseInt(st.nextToken());
+		M = Integer.parseInt(st.nextToken());
+		data = new int[M][3]; // 시작도시, 도착도시, 걸리는 시간(정수)
+
+		for (int i=0; i<M; i++) {
+			st = new StringTokenizer(br.readLine());
+			int s = Integer.parseInt(st.nextToken());
+			int e = Integer.parseInt(st.nextToken());
+			int cost = Integer.parseInt(st.nextToken());
+			data[i][0] = s;
+			data[i][1] = e;
+			data[i][2] = cost;
+		}
+
+	}
+
+	static void solution() {
+		long[] dist = new long[N+1];
+		Arrays.fill(dist, INF);
+		dist[1] = 0; // 시작도시 1
+
+		StringBuilder sb = new StringBuilder();
+		for (int i=1; i<=N; i++) {
+			for (int[] d : data) {
+				if (dist[d[0]] == INF) continue;
+
+				long nextDist = dist[d[0]] + d[2];
+				if (nextDist < dist[d[1]]) {
+					dist[d[1]] = nextDist;
+					if (i == N) {
+						sb.append(-1);
+						System.out.println(sb.toString());
+						return;
+					}
+				}
+			}
+		}
+
+
+		for (int i=2; i<=N; i++) {
+			if (dist[i] == INF)
+				sb.append(-1).append("\n");
+			else
+				sb.append(dist[i]).append("\n");
+		}
+		System.out.println(sb.toString());
+	}
+
+
+
 }
